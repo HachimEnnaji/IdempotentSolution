@@ -5,7 +5,8 @@ namespace IdempotentApi.Abstractions;
 
 public class IdempotencyService(IMemoryCache cache) : IIdempotencyService
 {
-    private readonly IMemoryCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+    private readonly IMemoryCache _cache = cache
+        ?? throw new ArgumentNullException(nameof(cache));
 
     public Task<string?> GetKeyAsync(string key)
     {
@@ -15,7 +16,8 @@ public class IdempotencyService(IMemoryCache cache) : IIdempotencyService
 
     public Task SetKeyAsync(string key, string value, TimeSpan? expiration = null)
     {
-        _cache.Set(key, value, expiration ?? TimeSpan.FromMinutes(5));
+        _cache.Set(key, value, expiration
+            ?? TimeSpan.FromMinutes(5));
         return Task.CompletedTask;
     }
 }

@@ -192,6 +192,7 @@ publish/
 # in these scripts will be unencrypted
 PublishScripts/
 
+
 # NuGet Packages
 *.nupkg
 # NuGet Symbol Packages
@@ -361,3 +362,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+appsettings.json
