@@ -33,5 +33,6 @@ This project provides a REST API for order management, with support for idempote
 - **Automated tests**: Add unit and integration tests.
 - **Swagger documentation**: Improve endpoint documentation.
 - **Error handling**: Centralize exception and error message management.
+- **Front End Client**: A client responsible sending request and generating an idempotent-key for each one.
 
 
