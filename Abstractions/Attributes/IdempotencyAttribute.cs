@@ -7,9 +7,10 @@ using System.Text.Json;
 namespace IdempotentApi.Abstractions.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class IdempotencyFilterAttribute : Attribute, IAsyncActionFilter
+    public class IdempotencyFilterAttribute(int ttlMinutes = 60) : Attribute, IAsyncActionFilter
     {
-        private readonly int _ttl;
+        private readonly int _ttl = ttlMinutes;
+
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var key = context.HttpContext.Request.Headers["Idempotency-Key"].ToString();
