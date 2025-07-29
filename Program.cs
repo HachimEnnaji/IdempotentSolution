@@ -14,7 +14,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
-builder.Services.AddSingleton<IIdempotencyService, IdempotencyService>();
+builder.Services.AddSingleton<IIdempotencyServiceCache, IdempotencyServiceCache>();
 builder.Services.AddSingleton<IdempotencyAttribute>();
 
 var app = builder.Build();

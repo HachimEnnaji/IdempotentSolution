@@ -7,10 +7,10 @@ using System.Text.Json;
 namespace IdempotentApi.Abstractions.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class IdempotencyAttribute(IIdempotencyService cache, int ttlMinutes = 60) : Attribute, IAsyncActionFilter
+    public class IdempotencyAttribute(IIdempotencyServiceCache cache, int ttlMinutes = 60) : Attribute, IAsyncActionFilter
     {
         private readonly int _ttl = ttlMinutes;
-        private readonly IIdempotencyService _cache = cache
+        private readonly IIdempotencyServiceCache _cache = cache
             ?? throw new Exception("Missing IIdempotency Service");
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
