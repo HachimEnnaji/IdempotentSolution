@@ -4,11 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IdempotentApi.Api
 {
+
+    //f874c327-db96-4c03-8383-80d5c712a4d7
     [Route("api/[controller]")]
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        [IdempotencyFilter(ttlMinutes: 60)]
+        [TypeFilter(typeof(IdempotencyAttribute))]
+
         [HttpPost("create")]
         public IActionResult CreateOrder([FromBody] CreateOrderRequest request)
         {

@@ -7,10 +7,11 @@ using System.Text.Json;
 namespace IdempotentApi.Abstractions.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class IdempotencyFilterAttribute(int ttlMinutes = 60) : Attribute, IAsyncActionFilter
+    public class IdempotencyAttribute(IIdempotencyService cache, int ttlMinutes = 60) : Attribute, IAsyncActionFilter
     {
         private readonly int _ttl = ttlMinutes;
-
+        private readonly IIdempotencyService _cache = cache
+            ?? throw new Exception("Missing IIdempotency Service");
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var key = context.HttpContext.Request.Headers["Idempotency-Key"].ToString();
@@ -21,9 +22,9 @@ namespace IdempotentApi.Abstractions.Attributes
                 return;
             }
 
-            var cache = context.HttpContext.RequestServices.GetRequiredService<IIdempotencyService>();
+            //var cache = context.HttpContext.RequestServices.GetRequiredService<IIdempotencyService>();
 
-            var cached = await cache.GetKeyAsync(key);
+            var cached = await _cache.GetKeyAsync(key);
 
             if (cached is not null)
             {
@@ -48,7 +49,7 @@ namespace IdempotentApi.Abstractions.Attributes
 
                 var serialized = JsonSerializer.Serialize(response);
 
-                await cache.SetKeyAsync(key, serialized, TimeSpan.FromSeconds(_ttl));
+                await _cache.SetKeyAsync(key, serialized, TimeSpan.FromSeconds(_ttl));
             }
 
         }

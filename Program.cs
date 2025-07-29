@@ -1,14 +1,21 @@
 using IdempotentApi.Abstractions;
+using IdempotentApi.Abstractions.Attributes;
 using IdempotentApi.Abstractions.Interfaces;
+using IdempotentApi.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer(); // Necessario per Minimal API
-builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.OperationFilter<AddIdempotencyHeaderoperationFilter>();
+}
+);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IIdempotencyService, IdempotencyService>();
+builder.Services.AddSingleton<IdempotencyAttribute>();
 
 var app = builder.Build();
 
@@ -21,10 +28,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapControllers();
-app.MapGet("/", () =>
-{
-})
-.WithOpenApi();
 
 app.Run();
 
