@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace IdempotentApi.Abstractions;
 
-public class IdempotencyService(IMemoryCache cache) : IIdempotencyService
+public class IdempotencyServiceCache(IMemoryCache cache) : IIdempotencyServiceCache
 {
     private readonly IMemoryCache _cache = cache
         ?? throw new ArgumentNullException(nameof(cache));
