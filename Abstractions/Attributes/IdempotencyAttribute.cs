@@ -1,9 +1,9 @@
 ﻿using IdempotentApi.Abstractions.Interfaces;
 using IdempotentApi.Domain;
+using IdempotentApi.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Diagnostics;
-using System.Text.Json;
 
 namespace IdempotentApi.Abstractions.Attributes;
 
@@ -28,7 +28,7 @@ public class IdempotencyAttribute(IIdempotencyServiceCache cache, int ttlMinutes
 
         if (cached is not null)
         {
-            var response = JsonSerializer.Deserialize<IdempotencyResponse>(cached);
+            var response = Json.SafeDeserialize<IdempotencyResponse>(cached);
             context.Result = new ObjectResult(response)
             {
                 StatusCode = response?.IdemPotencyStatusCode ?? 200,
@@ -50,7 +50,7 @@ public class IdempotencyAttribute(IIdempotencyServiceCache cache, int ttlMinutes
                 IdemPotencyStatusCode = objectResult.StatusCode ?? 200,
             };
 
-            var serialized = JsonSerializer.Serialize(response);
+            var serialized = Json.SafeSerialize(response);
 
             await _cache.SetKeyAsync(key, serialized, TimeSpan.FromSeconds(_ttl));
         }
