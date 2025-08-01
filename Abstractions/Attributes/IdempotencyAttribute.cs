@@ -2,6 +2,7 @@
 using IdempotentApi.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace IdempotentApi.Abstractions.Attributes;
@@ -14,6 +15,7 @@ public class IdempotencyAttribute(IIdempotencyServiceCache cache, int ttlMinutes
         ?? throw new Exception("Missing IIdempotency Service");
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var stopwatch = Stopwatch.StartNew();
         var key = context.HttpContext.Request.Headers["Idempotency-Key"].ToString();
 
         if (string.IsNullOrWhiteSpace(key))
@@ -21,8 +23,6 @@ public class IdempotencyAttribute(IIdempotencyServiceCache cache, int ttlMinutes
             context.Result = new BadRequestObjectResult("Idempotency-Key header is required.");
             return;
         }
-
-        //var cache = context.HttpContext.RequestServices.GetRequiredService<IIdempotencyService>();
 
         var cached = await _cache.GetKeyAsync(key);
 
@@ -33,6 +33,9 @@ public class IdempotencyAttribute(IIdempotencyServiceCache cache, int ttlMinutes
             {
                 StatusCode = response?.IdemPotencyStatusCode ?? 200,
             };
+
+            Console.WriteLine($"\nIdempotency Key: {key} processed in {stopwatch.ElapsedMilliseconds} ms and the value was cached");
+
             return;
         }
 
@@ -52,5 +55,7 @@ public class IdempotencyAttribute(IIdempotencyServiceCache cache, int ttlMinutes
             await _cache.SetKeyAsync(key, serialized, TimeSpan.FromSeconds(_ttl));
         }
 
+        stopwatch.Stop();
+        Console.WriteLine($"\nIdempotency Key: {key} processed in {stopwatch.ElapsedMilliseconds} ms and the value wasn't cached");
     }
 }

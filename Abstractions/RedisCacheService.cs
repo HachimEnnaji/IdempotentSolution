@@ -1,26 +1,29 @@
 ﻿using IdempotentApi.Abstractions.Interfaces;
-using StackExchange.Redis;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace IdempotentApi.Abstractions;
 
-public class RedisCacheService(IConnectionMultiplexer redis) : IIdempotencyServiceCache
+public class RedisCacheService(IDistributedCache redis) : IIdempotencyServiceCache
 {
-    private readonly IDatabase _redis = redis.GetDatabase()
-        ?? throw new ArgumentNullException(nameof(redis));
+    private readonly IDistributedCache _redis = redis
+        ?? throw new ArgumentNullException($"{nameof(redis)} service cannot be null ");
 
-    public async Task<bool> HasResponseAsync(string key)
-       => await _redis.KeyExistsAsync(key);
     public async Task<string?> GetKeyAsync(string key)
     {
+        var response = await _redis.GetStringAsync(key);
 
-        var response = await _redis.StringGetAsync(key);
-
-        return response.HasValue ? response.ToString() : null;
+        return string.IsNullOrWhiteSpace(response) ? null : response.ToString();
     }
 
     public async Task SetKeyAsync(string key, string value, TimeSpan? expiration = null)
     {
-        await _redis.StringSetAsync(key, value, expiration ?? TimeSpan.FromMinutes(5));
+        DistributedCacheEntryOptions expirationTime = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpiration = DateTimeOffset.UtcNow.Add(expiration
+            ?? TimeSpan.FromMinutes(5))
+        };
+
+        await _redis.SetStringAsync(key, value, expirationTime, CancellationToken.None);
     }
 
 
